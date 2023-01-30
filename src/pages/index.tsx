@@ -2,8 +2,10 @@ import {
   Button,
   Code,
   Container,
+  CopyButton,
   Group,
   Space,
+  Stack,
   Table,
   Text,
   Textarea,
@@ -17,15 +19,6 @@ import dayjs from "dayjs";
 import { type NextPage } from "next";
 import Head from "next/head";
 import { useState } from "react";
-
-// const dummyData = [
-//   "1FVHCYFE1KHKJ5620",
-//   "1FVHG3DV 4MHMJ645",
-//   "1FVHCYDC65HN96015",
-//   "1FVHCYBS0DHBW7139",
-//   "1HTSHAAR41H376727",
-//   "1HTWXAHT27J461864",
-// ];
 
 type VinObj = {
   vin: string;
@@ -46,45 +39,78 @@ type APIResponse = {
   overallInspectionResult: string;
 }[];
 
-const url = "https://driveonportal.com/on-icaa-service/getVehicleTestResults/";
+const URL = "https://driveonportal.com/on-icaa-service/getVehicleTestResults/";
+const TRUE_ICON = "✅";
+const FALSE_ICON = "❌";
+const INSPECT_PASS = "P";
+const DATE_FORMAT = "MM/DD/YYYY";
+const NO_CHECK_ICON = "-";
+
+function arrToCsv(vinArr: VinObj[]) {
+  const csvOutput = [];
+  for (const { vin, valid, pass, date } of vinArr) {
+    const row = [
+      vin,
+      valid,
+      pass,
+      date ? dayjs(date).format(DATE_FORMAT) : "",
+    ].join("\t");
+    csvOutput.push(row);
+  }
+  return csvOutput.join("\n");
+}
 
 const Home: NextPage = () => {
   const [vinArr, setVinArr] = useState<VinObj[]>([]);
   const [loading, setLoading] = useState(false);
 
-  useQueries({
-    queries: vinArr.map(({ vin }, idx) => ({
+  const vinQueries = useQueries({
+    queries: vinArr.map(({ vin, valid }, idx) => ({
       queryKey: ["vin", vin],
-      queryFn: () => axios.get<APIResponse>(url + vin),
-      enabled: loading,
+      queryFn: () => axios.get<APIResponse>(URL + vin),
+      enabled: valid ? loading : false,
       onError() {
         console.error("error calling API...");
       },
       onSuccess(data: AxiosResponse<APIResponse>) {
         const newVinArr: VinObj[] = [...vinArr];
 
-        newVinArr[idx]!.pass = data.data[0]?.overallInspectionResult === "P";
+        newVinArr[idx]!.pass =
+          data.data[0]?.overallInspectionResult === INSPECT_PASS;
         newVinArr[idx]!.date = data.data[0]?.inspectionDate;
 
         setVinArr(newVinArr);
       },
-      onSettled: () => setLoading(false),
     })),
   });
 
-  const rows = vinArr.map(({ vin, valid, date, pass }) => (
-    <tr key={vin}>
-      <td>
-        <Code>{vin}</Code>
-      </td>
-      <td>{valid ? "✅" : "❌"}</td>
-      <td>{pass === true ? "✅" : pass === false ? "❌" : ""}</td>
-      <td>{dayjs(date).format("MM/DD/YYYY")}</td>
-    </tr>
-  ));
+  // Stop loader once all queries are no longer loading
+  if (loading && !vinQueries.some((v) => v.isLoading && v.isFetching)) {
+    setLoading(false);
+  }
 
-  // console.log(vinQueries);
-  console.log(vinArr);
+  const rows = vinArr.map(({ vin, valid, date, pass }) => {
+    const datePassed = date ? dayjs(date).format(DATE_FORMAT) : "";
+
+    return (
+      <tr key={vin}>
+        <td>
+          <Code>{vin}</Code>
+        </td>
+        <td>{valid ? TRUE_ICON : FALSE_ICON}</td>
+        <td>
+          {valid
+            ? pass === true
+              ? TRUE_ICON
+              : pass === false
+              ? FALSE_ICON
+              : ""
+            : NO_CHECK_ICON}
+        </td>
+        <td>{valid && pass ? datePassed : NO_CHECK_ICON}</td>
+      </tr>
+    );
+  });
 
   return (
     <>
@@ -95,37 +121,47 @@ const Home: NextPage = () => {
       </Head>
 
       <Container>
+        <Space h="xl" />
         <Title align="center">VIN Checker</Title>
         <Space h="xl" />
 
-        <Textarea
-          label="Paste the VIN numbers you'd like to check"
-          autosize
-          minRows={2}
-          maxRows={10}
-          w={400}
-          onChange={({ target: { value } }) => {
-            const newVinArr: VinObj[] = value
-              .split("\n")
-              .filter((e) => e.length)
-              .map((vin) => ({ vin, valid: validate(vin) }));
+        <Stack align="center">
+          <Textarea
+            label="Paste the VIN numbers you'd like to check"
+            autosize
+            minRows={2}
+            maxRows={10}
+            w={400}
+            onChange={({ target: { value } }) => {
+              const newVinArr: VinObj[] = value
+                .split("\n")
+                .filter((e) => e.length)
+                .map((vin) => ({ vin, valid: validate(vin) }));
 
-            setVinArr(newVinArr);
-          }}
-        />
-
-        <Group>
-          <Button
-            loading={loading}
-            onClick={() => {
-              setLoading(true);
+              setVinArr(newVinArr);
             }}
-          >
-            Check
-          </Button>
-          <Text>VINs: {vinArr.length}</Text>
-        </Group>
+          />
 
+          <Group w={400} position="apart">
+            <Text>VINs: {vinArr.length}</Text>
+            <Button
+              loading={loading}
+              onClick={() => {
+                setLoading(true);
+              }}
+            >
+              Check
+            </Button>
+          </Group>
+        </Stack>
+
+        <CopyButton value={arrToCsv(vinArr)}>
+          {({ copied, copy }) => (
+            <Button color={copied ? "teal" : "blue"} onClick={copy}>
+              {copied ? "Copied results" : "Copy results!"}
+            </Button>
+          )}
+        </CopyButton>
         <Table>
           <thead>
             <tr>
