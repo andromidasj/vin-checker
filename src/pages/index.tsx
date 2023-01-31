@@ -20,46 +20,16 @@ import dayjs from "dayjs";
 import { type NextPage } from "next";
 import Head from "next/head";
 import { useState } from "react";
-
-type VinObj = {
-  vin: string;
-  valid?: boolean;
-  pass?: boolean;
-  date?: string;
-};
-
-type APIResponse = {
-  inspectionId: number;
-  inspectionDate: string; // Date
-  stationId: string;
-  stationName: string;
-  vin: string;
-  vehicleYear: number;
-  vehicleMake: string;
-  vehicleModel: string;
-  overallInspectionResult: string;
-}[];
-
-const URL = "https://driveonportal.com/on-icaa-service/getVehicleTestResults/";
-const TRUE_ICON = "✅";
-const FALSE_ICON = "❌";
-const INSPECT_PASS = "P";
-const DATE_FORMAT = "MM/DD/YYYY";
-const NO_CHECK_ICON = "-";
-
-function arrToCsv(vinArr: VinObj[]) {
-  const csvOutput = [];
-  for (const { vin, valid, pass, date } of vinArr) {
-    const row = [
-      vin,
-      valid,
-      pass,
-      date ? dayjs(date).format(DATE_FORMAT) : "",
-    ].join("\t");
-    csvOutput.push(row);
-  }
-  return csvOutput.join("\n");
-}
+import {
+  DATE_FORMAT,
+  FALSE_ICON,
+  INSPECT_PASS,
+  NO_CHECK_ICON,
+  TRUE_ICON,
+  URL,
+} from "../consts";
+import type { APIResponse, VinObj } from "../types";
+import { arrToCsv } from "../util/arrToCsv";
 
 const Home: NextPage = () => {
   const [vinArr, setVinArr] = useState<VinObj[]>([]);
