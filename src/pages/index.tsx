@@ -97,7 +97,7 @@ const Home: NextPage = () => {
       </Head>
 
       <Flex direction="row-reverse">
-        <ActionIcon size="xl" mt={10} mr={10}>
+        <ActionIcon radius="xl" size="xl" mt={10} mr={10}>
           <a
             href="https://github.com/andromidasj"
             target="_blank"
