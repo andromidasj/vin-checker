@@ -3,6 +3,7 @@ import {
   Code,
   Container,
   CopyButton,
+  Flex,
   Group,
   Space,
   Stack,
@@ -63,12 +64,14 @@ function arrToCsv(vinArr: VinObj[]) {
 const Home: NextPage = () => {
   const [vinArr, setVinArr] = useState<VinObj[]>([]);
   const [loading, setLoading] = useState(false);
+  const [checkHasRun, setCheckHasRun] = useState(false);
 
   const vinQueries = useQueries({
     queries: vinArr.map(({ vin, valid }, idx) => ({
       queryKey: ["vin", vin],
-      queryFn: () => axios.get<APIResponse>(URL + vin),
-      enabled: valid ? loading : false,
+      queryFn: valid ? () => axios.get<APIResponse>(URL + vin) : () => null,
+      // enabled: valid ? loading : false,
+      enabled: false,
       onError() {
         console.error("error calling API...");
       },
@@ -87,6 +90,7 @@ const Home: NextPage = () => {
   // Stop loader once all queries are no longer loading
   if (loading && !vinQueries.some((v) => v.isLoading && v.isFetching)) {
     setLoading(false);
+    setCheckHasRun(true);
   }
 
   const rows = vinArr.map(({ vin, valid, date, pass }) => {
@@ -139,6 +143,7 @@ const Home: NextPage = () => {
                 .map((vin) => ({ vin, valid: validate(vin) }));
 
               setVinArr(newVinArr);
+              setCheckHasRun(false);
             }}
           />
 
@@ -147,32 +152,39 @@ const Home: NextPage = () => {
             <Button
               loading={loading}
               onClick={() => {
+                // eslint-disable-next-line @typescript-eslint/no-misused-promises
+                vinQueries.forEach(async (e) => await e.refetch());
                 setLoading(true);
               }}
             >
               Check
             </Button>
           </Group>
-        </Stack>
 
-        <CopyButton value={arrToCsv(vinArr)}>
-          {({ copied, copy }) => (
-            <Button color={copied ? "teal" : "blue"} onClick={copy}>
-              {copied ? "Copied results" : "Copy results!"}
-            </Button>
+          {checkHasRun && (
+            <Flex justify="flex-end">
+              <CopyButton value={arrToCsv(vinArr)}>
+                {({ copied, copy }) => (
+                  <Button color={copied ? "teal" : "blue"} onClick={copy}>
+                    {copied ? "Copied results!" : "Copy results"}
+                  </Button>
+                )}
+              </CopyButton>
+            </Flex>
           )}
-        </CopyButton>
-        <Table>
-          <thead>
-            <tr>
-              <td>VIN</td>
-              <td>Valid</td>
-              <td>Pass</td>
-              <td>Date</td>
-            </tr>
-          </thead>
-          <tbody>{rows}</tbody>
-        </Table>
+
+          <Table>
+            <thead>
+              <tr>
+                <td>VIN</td>
+                <td>Valid</td>
+                <td>Pass</td>
+                <td>Date</td>
+              </tr>
+            </thead>
+            <tbody>{rows}</tbody>
+          </Table>
+        </Stack>
       </Container>
     </>
   );
