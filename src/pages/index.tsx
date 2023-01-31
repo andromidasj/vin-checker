@@ -119,7 +119,7 @@ const Home: NextPage = () => {
               <Text>
                 Paste the VINs below and click <Code>Check</Code>. Then browse
                 the results in the table below, or copy and paste them into your
-                spreasheet with the <Code>Copy results</Code> button.
+                spreadsheet with the <Code>Copy results</Code> button.
               </Text>
             }
             autosize
