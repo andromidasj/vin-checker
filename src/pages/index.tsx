@@ -1,10 +1,12 @@
 import {
+  ActionIcon,
   Button,
   Code,
   Container,
   CopyButton,
   Flex,
   Group,
+  Image,
   Space,
   Stack,
   Table,
@@ -89,19 +91,37 @@ const Home: NextPage = () => {
   return (
     <>
       <Head>
-        <title>VIN Checker</title>
+        <title>E-Test Checker - Ontario, Canada</title>
         <meta name="description" content="Created by Josh Andromidas" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
+      <Flex direction="row-reverse">
+        <ActionIcon size="xl" mt={10} mr={10}>
+          <a
+            href="https://github.com/andromidasj"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <Image src="./github.svg" alt="https://github.com/andromidasj" />
+          </a>
+        </ActionIcon>
+      </Flex>
+
       <Container>
         <Space h="xl" />
-        <Title align="center">VIN Checker</Title>
+        <Title align="center">E-Test Checker - Ontario, Canada</Title>
         <Space h="xl" />
 
         <Stack align="center">
           <Textarea
-            label="Paste the VIN numbers you'd like to check"
+            label={
+              <Text>
+                Paste the VINs below and click <Code>Check</Code>. Then browse
+                the results in the table below, or copy and paste them into your
+                spreasheet with the <Code>Copy results</Code> button.
+              </Text>
+            }
             autosize
             minRows={2}
             maxRows={10}
@@ -143,17 +163,19 @@ const Home: NextPage = () => {
             </Flex>
           )}
 
-          <Table>
-            <thead>
-              <tr>
-                <td>VIN</td>
-                <td>Valid</td>
-                <td>Pass</td>
-                <td>Date</td>
-              </tr>
-            </thead>
-            <tbody>{rows}</tbody>
-          </Table>
+          {!!vinArr.length && (
+            <Table>
+              <thead>
+                <tr>
+                  <td>VIN</td>
+                  <td>Valid</td>
+                  <td>Pass</td>
+                  <td>Date</td>
+                </tr>
+              </thead>
+              <tbody>{rows}</tbody>
+            </Table>
+          )}
         </Stack>
       </Container>
     </>
