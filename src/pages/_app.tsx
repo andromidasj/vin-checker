@@ -4,6 +4,7 @@ import type { AppProps } from "next/app";
 import Head from "next/head";
 
 export default function App(props: AppProps) {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const { Component, pageProps } = props;
   const queryClient = new QueryClient();
 
