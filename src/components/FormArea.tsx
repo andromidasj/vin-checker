@@ -2,31 +2,29 @@ import { Button, Code, Group, Text, Textarea } from "@mantine/core";
 import type { UseQueryResult } from "@tanstack/react-query";
 import { validate } from "@voxasoftworks/vin";
 import type { AxiosResponse } from "axios";
-import type { Dispatch, SetStateAction } from "react";
-import { useState } from "react";
+import { atom, useAtom, useSetAtom } from "jotai";
+import { useEffect } from "react";
+import { hasRunAtom, vinArrAtom } from "../pages";
 import type { APIResponse, VinObj } from "../types";
+
+export const loadingAtom = atom(false);
 
 interface Props {
   vinQueries: UseQueryResult<AxiosResponse<APIResponse>>[];
-  setCheckHasRun: Dispatch<SetStateAction<boolean>>;
-  vinArr: VinObj[];
-  setVinArr: Dispatch<SetStateAction<VinObj[]>>;
 }
 
-export default function FormArea({
-  vinQueries,
-  setCheckHasRun,
-  vinArr,
-  setVinArr,
-}: Props) {
-  // const [vinArr, setVinArr] = useState<VinObj[]>([]);
-  const [loading, setLoading] = useState(false);
+export default function FormArea({ vinQueries }: Props) {
+  const [loading, setLoading] = useAtom(loadingAtom);
+  const setCheckHasRun = useSetAtom(hasRunAtom);
+  const [vinArr, setVinArr] = useAtom(vinArrAtom);
 
-  // Stop loader once all queries are no longer loading
-  if (loading && !vinQueries.some((v) => v.isLoading && v.isFetching)) {
-    setLoading(false);
-    setCheckHasRun(true);
-  }
+  useEffect(() => {
+    // Stop loader once all queries are no longer loading
+    if (loading && vinQueries.every((v) => v.isSuccess)) {
+      setLoading(false);
+      setCheckHasRun(true);
+    }
+  }, [loading, setCheckHasRun, setLoading, vinQueries]);
 
   return (
     <>
@@ -58,9 +56,9 @@ export default function FormArea({
         <Button
           loading={loading}
           onClick={() => {
+            setLoading(true);
             // eslint-disable-next-line @typescript-eslint/no-misused-promises
             vinQueries.forEach(async (e) => await e.refetch());
-            setLoading(true);
           }}
         >
           Check

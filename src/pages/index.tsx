@@ -13,9 +13,9 @@ import { useQueries } from "@tanstack/react-query";
 import type { AxiosResponse } from "axios";
 import axios from "axios";
 import dayjs from "dayjs";
+import { atom, useAtom, useAtomValue } from "jotai";
 import { type NextPage } from "next";
 import Head from "next/head";
-import { useState } from "react";
 import FormArea from "../components/FormArea";
 import Github from "../components/Github";
 import {
@@ -29,9 +29,12 @@ import {
 import type { APIResponse, VinObj } from "../types";
 import { arrToCsv } from "../util/arrToCsv";
 
+export const vinArrAtom = atom<VinObj[]>([]);
+export const hasRunAtom = atom(false);
+
 const Home: NextPage = () => {
-  const [vinArr, setVinArr] = useState<VinObj[]>([]);
-  const [checkHasRun, setCheckHasRun] = useState(false);
+  const [vinArr, setVinArr] = useAtom(vinArrAtom);
+  const checkHasRun = useAtomValue(hasRunAtom);
 
   const vinQueries = useQueries({
     queries: vinArr.map(({ vin, valid }, idx) => ({
@@ -91,12 +94,7 @@ const Home: NextPage = () => {
         <Space h="xl" />
 
         <Stack align="center">
-          <FormArea
-            vinQueries={vinQueries}
-            setCheckHasRun={setCheckHasRun}
-            vinArr={vinArr}
-            setVinArr={setVinArr}
-          />
+          <FormArea vinQueries={vinQueries} />
 
           {checkHasRun && (
             <Flex justify="flex-end">
