@@ -41,10 +41,12 @@ const Home: NextPage = () => {
       },
       onSuccess(data: AxiosResponse<APIResponse>) {
         const newVinArr: VinObj[] = [...vinArr];
+        const currentVin = newVinArr[idx];
+        if (!currentVin) return;
 
-        newVinArr[idx]!.pass =
+        currentVin.pass =
           data.data[0]?.overallInspectionResult === INSPECT_PASS;
-        newVinArr[idx]!.date = data.data[0]?.inspectionDate;
+        currentVin.date = data.data[0]?.inspectionDate;
 
         setVinArr(newVinArr);
       },
