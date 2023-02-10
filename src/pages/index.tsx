@@ -24,7 +24,6 @@ import {
   INSPECT_PASS,
   NO_CHECK_ICON,
   TRUE_ICON,
-  URL,
 } from "../consts";
 import type { APIResponse, VinObj } from "../types";
 import { arrToCsv } from "../util/arrToCsv";
@@ -32,17 +31,21 @@ import { arrToCsv } from "../util/arrToCsv";
 export const vinArrAtom = atom<VinObj[]>([]);
 export const hasRunAtom = atom(false);
 
+const API_ERROR_MSG = "error calling API...";
+const VIN_ID = "vin";
+const URL = "https://driveonportal.com/on-icaa-service/getVehicleTestResults/";
+
 const Home: NextPage = () => {
   const [vinArr, setVinArr] = useAtom(vinArrAtom);
   const checkHasRun = useAtomValue(hasRunAtom);
 
   const vinQueries = useQueries({
     queries: vinArr.map(({ vin, valid }, idx) => ({
-      queryKey: ["vin", vin],
+      queryKey: [VIN_ID, vin],
       queryFn: valid ? () => axios.get<APIResponse>(URL + vin) : () => null,
       enabled: false,
       onError() {
-        console.error("error calling API...");
+        console.error(API_ERROR_MSG);
       },
       onSuccess(data: AxiosResponse<APIResponse>) {
         const newVinArr: VinObj[] = [...vinArr];

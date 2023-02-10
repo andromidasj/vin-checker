@@ -1,5 +1,3 @@
-export const URL =
-  "https://driveonportal.com/on-icaa-service/getVehicleTestResults/";
 export const TRUE_ICON = "✅";
 export const FALSE_ICON = "❌";
 export const INSPECT_PASS = "P";
