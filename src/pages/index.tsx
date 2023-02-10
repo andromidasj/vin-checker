@@ -1,37 +1,29 @@
 import {
   Button,
-  Code,
   Container,
   CopyButton,
   Flex,
   Space,
   Stack,
-  Table,
   Title,
 } from "@mantine/core";
 import { useQueries } from "@tanstack/react-query";
 import type { AxiosResponse } from "axios";
 import axios from "axios";
-import dayjs from "dayjs";
 import { atom, useAtom, useAtomValue } from "jotai";
 import { type NextPage } from "next";
 import Head from "next/head";
 import FormArea from "../components/FormArea";
 import Github from "../components/Github";
-import {
-  DATE_FORMAT,
-  FALSE_ICON,
-  INSPECT_PASS,
-  NO_CHECK_ICON,
-  TRUE_ICON,
-} from "../consts";
+import ResultTable from "../components/ResultTable";
+import { INSPECT_PASS } from "../consts";
 import type { APIResponse, VinObj } from "../types";
 import { arrToCsv } from "../util/arrToCsv";
 
 export const vinArrAtom = atom<VinObj[]>([]);
 export const hasRunAtom = atom(false);
 
-const API_ERROR_MSG = "error calling API...";
+const API_ERROR_MSG = "Error calling API...";
 const VIN_ID = "vin";
 const URL = "https://driveonportal.com/on-icaa-service/getVehicleTestResults/";
 
@@ -57,29 +49,6 @@ const Home: NextPage = () => {
         setVinArr(newVinArr);
       },
     })),
-  });
-
-  const rows = vinArr.map(({ vin, valid, date, pass }) => {
-    const datePassed = date ? dayjs(date).format(DATE_FORMAT) : "";
-
-    return (
-      <tr key={vin}>
-        <td>
-          <Code>{vin}</Code>
-        </td>
-        <td>{valid ? TRUE_ICON : FALSE_ICON}</td>
-        <td>
-          {valid
-            ? pass === true
-              ? TRUE_ICON
-              : pass === false
-              ? FALSE_ICON
-              : ""
-            : NO_CHECK_ICON}
-        </td>
-        <td>{valid && pass ? datePassed : NO_CHECK_ICON}</td>
-      </tr>
-    );
   });
 
   return (
@@ -111,19 +80,7 @@ const Home: NextPage = () => {
             </Flex>
           )}
 
-          {!!vinArr.length && (
-            <Table>
-              <thead>
-                <tr>
-                  <td>VIN</td>
-                  <td>Valid</td>
-                  <td>Pass</td>
-                  <td>Date</td>
-                </tr>
-              </thead>
-              <tbody>{rows}</tbody>
-            </Table>
-          )}
+          {!!vinArr.length && <ResultTable />}
         </Stack>
       </Container>
     </>

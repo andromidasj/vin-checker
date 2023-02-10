@@ -2,19 +2,17 @@ import { Button, Code, Group, Text, Textarea } from "@mantine/core";
 import type { UseQueryResult } from "@tanstack/react-query";
 import { validate } from "@voxasoftworks/vin";
 import type { AxiosResponse } from "axios";
-import { atom, useAtom, useSetAtom } from "jotai";
-import { useEffect } from "react";
+import { useAtom, useSetAtom } from "jotai";
+import { useEffect, useState } from "react";
 import { hasRunAtom, vinArrAtom } from "../pages";
 import type { APIResponse, VinObj } from "../types";
-
-export const loadingAtom = atom(false);
 
 interface Props {
   vinQueries: UseQueryResult<AxiosResponse<APIResponse>>[];
 }
 
 export default function FormArea({ vinQueries }: Props) {
-  const [loading, setLoading] = useAtom(loadingAtom);
+  const [loading, setLoading] = useState(false);
   const setCheckHasRun = useSetAtom(hasRunAtom);
   const [vinArr, setVinArr] = useAtom(vinArrAtom);
 
