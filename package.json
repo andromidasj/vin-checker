@@ -19,6 +19,7 @@
     "@voxasoftworks/vin": "1.0.1",
     "axios": "1.2.6",
     "dayjs": "1.11.7",
+    "jotai": "2.0.1",
     "next": "13.1.2",
     "react": "18.2.0",
     "react-dom": "18.2.0",
